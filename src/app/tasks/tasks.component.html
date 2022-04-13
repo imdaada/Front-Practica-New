@@ -1,0 +1,193 @@
+<div class="form">Время на момент загрузки страницы: <div class="title_zad">{{timeToView(currentTime)}}</div></div>
+<div *ngIf="!create&&!emit&&!emitted&&!created" class="form"><iframe src="https://calendar.google.com/calendar/embed?height=200&wkst=1&bgcolor=%233F51B5&ctz=Europe%2FMoscow&showTitle=0&showNav=1&showDate=0&showTz=0&showCalendars=0&showTabs=0&showPrint=0&src=cnUucnVzc2lhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%230B8043" style="border-width:0" width="300" height="200" frameborder="0" scrolling="no"></iframe></div>
+<p></p>
+<div class="str" *ngIf="role === 'ROLE_TEACHER'">
+  <div class="nav">
+    <button mat-stroked-button (click)="setCreate()">Новое задание</button>
+    <button mat-stroked-button (click)="setEmit()">Выдать задание</button>
+    <button mat-stroked-button (click)="setCreated()">Созданные задания</button>
+    <button mat-stroked-button (click)="setEmitted()">Выданные задания</button>
+  </div>
+  <p></p>
+  <form class="form" [formGroup]="createForm" *ngIf="create">
+    <p class="mat-card-title">Создать задание:</p>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Название задания</mat-label>
+      <input matInput required name="name" id="name" formControlName="name" [(ngModel)]="newTask.taskName"/>
+    </mat-form-field>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Предмет</mat-label>
+      <input matInput required name="subject" id="subject" formControlName="subject" [(ngModel)]="newTask.taskSubject"/>
+    </mat-form-field>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Текст задания</mat-label>
+      <textarea matInput required name="text" id="text" formControlName="text"  [(ngModel)]="newTask.textOfTask"></textarea>
+    </mat-form-field>
+    <input class="form-fild" name="fileName" id="fileName" [(ngModel)]="fileName" [ngModelOptions]="{standalone: true}"/>
+    <app-file-upload
+      [fileApiLink]="fileApiLink"
+      [fileName]="fileName"
+      (newFile)="onUploadFile($event)"></app-file-upload>
+    <button class="form-fild" [disabled]="!createForm.valid" (click)= "submit()" mat-stroked-button>Создать</button>
+  </form>
+
+  <form class="form" [formGroup]="emitForm" *ngIf="emit">
+    <p class="mat-card-title">Выдать задание:</p>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Логин ученика</mat-label>
+      <input formControlName="login" autocomplete="off" matInput required name="login" id="login1" [(ngModel)]="newCurrentTask.studentLogin.login" (keyup)="findLogin()">
+    </mat-form-field>
+    <div *ngFor="let user of users"><a (click)="insertLogin(user.login)" href="javascript:console.log(1)"
+          >{{user.login + '(' + user.firstName + ' ' + user.surname + ')'}}</a></div>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Номер задания</mat-label>
+      <input formControlName="num" matInput required name="number" id="number" [(ngModel)]="newCurrentTask.taskId.id">
+    </mat-form-field>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Дата окончания</mat-label>
+      <input formControlName="date" matInput required name="text" id="text1" type="datetime-local" [(ngModel)]="newCurrentTask.limitDate">
+    </mat-form-field>
+    <button class="form-fild" [disabled]="!emitForm.valid" (click)="emitTask()" mat-stroked-button>Выдать</button>
+  </form>
+
+  <mat-accordion *ngIf="created">
+    <button mat-stroked-button (click)="sortTaskByDate()">Сначала новые</button>
+    <button mat-stroked-button (click)="sortTaskByName()">Сортировка по названию</button>
+    <div *ngIf="tasks.length === 0" class="mat-card-title form">Нет созданных заданий</div>
+    <mat-expansion-panel hideToggle *ngFor="let task of tasks">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Номер задания: <div class="title_zad">{{task.id}}</div>
+        </mat-panel-title>
+        <mat-panel-description>
+          {{task.taskName}}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div><div class="title_zad">Назавние:</div> {{task.taskName}}</div>
+      <div><div class="title_zad">Предмет:</div> {{task.taskSubject}}</div>
+      <div><div class="title_zad">Текст задания:</div> {{task.textOfTask}}</div>
+      <div class="title_zad">Прикрепленные файлы: </div>
+      <a *ngFor="let file of task.attachedFiles" href="{{baseURL}}file/download/{{file.id}}">
+        <div>{{file.name}}</div></a>
+      <div *ngIf="task.attachedFiles.length !== 0">
+        <div>
+          <button class="form-fild" (click)="deleteLastFile(task.attachedFiles)" mat-stroked-button color="warn">Удалить последний
+            загруженный файл
+          </button>
+        </div>
+      </div>
+      <div *ngIf="task.attachedFiles.length === 0">
+        <div>
+          <button class="form-fild" (click)="deleteTask(task)" mat-stroked-button color="warn">Удалить задание</button>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <mat-accordion *ngIf="emitted">
+    <button mat-stroked-button (click)="sortCurrentTaskByCloseDate()">Сначала ближайшие</button>
+    <button mat-stroked-button (click)="sortCurrentTaskByDate()">Сначала новые</button>
+    <button mat-stroked-button (click)="sortCurrentTaskByTaken()">Сначала в процессе</button>
+    <div *ngIf="currentTasks.length === 0" class="mat-card-title form">Нет выданных заданий</div>
+    <mat-expansion-panel hideToggle *ngFor="let currentTask of currentTasks">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Номер задания: <div class="title_zad">{{currentTask.id}}</div>
+          <div class="started" *ngIf="currentTask.taken&&!currentTask.grade&&!currentTask.closed"> (Задание в процессе!)</div>
+          <div class="not-started" *ngIf="!currentTask.taken"> (Задание не начато!)</div>
+          <div class="graded" *ngIf="currentTask.grade"> (Задание оценено!)</div>
+          <div class="time-out" *ngIf="!currentTask.grade&&currentTask.closed"> (Задание просрочено!)</div>
+        </mat-panel-title>
+        <mat-panel-description>
+          {{timeToView(currentTask.dateOfLastChange)}}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="zad">
+        <div>
+        <div class="title_zad">Выдано студенту:</div> {{currentTask.studentLogin.firstName + ' ' + currentTask.studentLogin.surname + '(' + currentTask.studentLogin.login + ')'}}</div>
+        <div><div class="title_zad">Дата выдачи:</div> {{timeToView(currentTask.dateOfGive)}}</div>
+        <div><div class="title_zad">Дата окончания:</div> {{timeToView(currentTask.limitDate)}}</div>
+        <div><div class="title_zad">Номер задания:</div> {{currentTask.id}}</div>
+        <div><div class="title_zad">Ответ на задание:</div> {{currentTask.answerOnTask}}</div>
+        <div><div class="title_zad">Приято:</div> {{setDaNet(currentTask.taken)}}</div>
+        <div><div class="title_zad">Оценено:</div> {{setDaNet(currentTask.grade)}}</div>
+        <div><div class="title_zad">Истек срок:</div>{{setDaNet(currentTask.closed)}}</div>
+        <div><div class="title_zad">Отзыв:</div> {{currentTask.feedback}}</div>
+        <div><div class="title_zad">Прикрепленные к ответу файлы:</div> </div>
+      <a *ngFor="let file of currentTask.attachedFiles" href="{{baseURL}}file/download/{{file.id}}">
+        <div>{{file.name}}</div></a>
+      <div class="form" *ngIf="!currentTask.grade && currentTask.taken">
+        <mat-form-field class="form-fild" appearance="fill">
+          <mat-label>Отзыв:</mat-label>
+          <textarea matInput [name]="currentTask.id + 'd'" [(ngModel)]="currentTask.feedback"></textarea>
+        </mat-form-field>
+        <label>Оценка окончательная:</label>
+        <input class="form-fild" type="checkbox" [name]="currentTask.id + 'е'" [(ngModel)]="grade">
+        <button class="form-fild" (click)="changeCurrentTask(currentTask)" mat-stroked-button>Изменить отзыв</button>
+      </div>
+      </div>
+      <!--<p><button (click)="deleteTask(currentTask)" mat-stroked-button color="warn">Удалить задание</button></p>-->
+    </mat-expansion-panel>
+  </mat-accordion>
+
+</div>
+
+
+<div *ngIf="role === 'ROLE_STUDENT'">
+  <button mat-stroked-button (click)="sortCurrentTaskByCloseDate()">Сначала ближайшие</button>
+  <button mat-stroked-button (click)="sortCurrentTaskByDate()">Сначала новые</button>
+  <button mat-stroked-button (click)="sortCurrentTaskByTaken()">Сначала в процессе</button>
+  <div *ngIf="currentTasksCopy.length === 0" class="mat-card-title form">Нет полученных заданий</div>
+  <mat-accordion>
+    <mat-expansion-panel hideToggle *ngFor="let task of currentTasks">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <div class="title_zad">{{task.taskId.taskName + ': '}} </div>
+          <div class="title_zad">{{' ' + task.taskId.taskSubject}}</div>
+          <div class="started" *ngIf="task.taken&&!task.grade&&!task.closed"> (Задание в процессе!)</div>
+          <div class="not-started" *ngIf="!task.taken"> (Задание не начато!)</div>
+          <div class="graded" *ngIf="task.grade"> (Задание оценено!)</div>
+          <div class="time-out" *ngIf="!task.grade&&task.closed"> (Задание просрочено!)</div>
+        </mat-panel-title>
+        <mat-panel-description>
+          {{timeToView(task.dateOfLastChange)}}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="zad">
+      <div><div class="title_zad">Дата окончания:</div> {{timeToView(task.limitDate)}}</div>
+        <div><div class="title_zad">Назавние:</div> {{task.taskId.taskName}}</div>
+      <div><div class="title_zad">Предмет:</div> {{task.taskId.taskSubject}}</div>
+      <div><div class="title_zad">Текст задания:</div> {{task.taskId.textOfTask}}</div>
+      <div class="title_zad">Прикрепленные файлы: </div>
+      <a *ngFor="let file of task.taskId.attachedFiles" href="{{baseURL}}file/download/{{file.id}}">
+        <div>{{file.name}}</div></a>
+      <div><div class="title_zad">Ответ на задание</div> {{task.answerOnTask}}</div>
+      <div><div class="title_zad">Приято:</div> {{setDaNet(task.taken)}}</div>
+      <div><div class="title_zad">Оценено:</div> {{setDaNet(task.grade)}}</div>
+      <div><div class="title_zad">Истек срок:</div> {{setDaNet(task.closed)}}</div>
+      <div><div class="title_zad">Отзыв:</div> {{task.feedback}}</div>
+      <div class="title_zad">Прикрепленные к ответу файлы: </div>
+      <a *ngFor="let file of task.attachedFiles" href="{{baseURL}}file/download/{{file.id}}">
+        <div>{{file.name}}</div></a>
+      <div class="form" *ngIf="!task.grade&&!task.closed">
+        <mat-slide-toggle [(ngModel)]="task.taken">Принять</mat-slide-toggle>
+        <div>
+          <mat-form-field class="form-fild" *ngIf="task.taken" appearance="fill">
+            <mat-label>Ответ:</mat-label>
+            <textarea matInput [name]="task.id + 'd'" [(ngModel)]="task.answerOnTask"></textarea>
+          </mat-form-field>
+        </div>
+        <input class="form-fild" name="fileName" id="fileName1" [(ngModel)]="fileName"/>
+        <app-file-upload
+          [fileApiLink]="fileApiLink"
+          [fileName]="fileName"
+          (newFile)="onUploadFile($event)"></app-file-upload>
+        <button class="form-fild" (click)="changeCurrentTask(task)" mat-stroked-button>Отправить</button>
+        <button *ngIf="task.attachedFiles.length !== 0" class="form-fild" (click)="deleteLastFile(task.attachedFiles)" mat-stroked-button color="warn">Удалить последний
+            загруженный файл
+        </button>
+      </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

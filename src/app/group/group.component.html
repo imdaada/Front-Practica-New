@@ -1,0 +1,46 @@
+<div class="time">Время на момент загрузки страницы: <div class="student">{{timeToView(currentTime)}}</div></div>
+<p></p>
+<div *ngIf="role === 'ROLE_TEACHER'">
+  <form class="form">
+    <p class="mat-card-title">Создать группу:</p>
+    <mat-form-field class="form-fild" appearance="fill">
+      <mat-label>Название</mat-label>
+      <input required matInput name="name" id="name" [(ngModel)]="newGroup.groupName">
+    </mat-form-field>
+    <button class="form-fild" [disabled] = "(newGroup.groupName === undefined)||(newGroup.groupName === '')" (click)="createGroup()" mat-stroked-button>Создать</button>
+  </form>
+  <mat-accordion>
+    <p *ngIf="groups.length === 0" class="mat-card-title form">Нет созданых групп</p>
+    <mat-expansion-panel hideToggle *ngFor="let group of groups">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{group.groupName}}
+        </mat-panel-title>
+        <mat-panel-description>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="student" *ngFor="let groupRecord of group.groupRecords">{{groupRecord.studentLogin.login + '(' + groupRecord.studentLogin.firstName + ' ' + groupRecord.studentLogin.surname + ')'}}</div>
+      <div>Добавить ученика:</div>
+      <mat-form-field class="form-fild" appearance="fill">
+        <mat-label>Логин ученика</mat-label>
+        <input autocomplete="off" matInput name="login" id="login1" [(ngModel)]="newGroupRecord.studentLogin.login" (keyup)="findLogin()">
+      </mat-form-field>
+      <div *ngFor="let user of users"><a (click)="insertLogin(user.login)" href="javascript:console.log(1)" >{{user.login + '(' + user.firstName + ' ' + user.surname + ')'}}</a></div>
+      <div><button (click)="addGroupRecord(group)" mat-stroked-button>Добавить ученика</button></div>
+      <div *ngIf="group.groupRecords.length !== 0"><button (click)="deleteLastGroupRecord(group)" mat-stroked-button color="warn">Удалить последенего добавленного ученика</button></div>
+      <div *ngIf="group.groupRecords.length === 0"><button (click)="deleteGroup(group)" mat-stroked-button color="warn">Удалить группу</button></div>
+      <div><button (click)="setEmit()" mat-stroked-button>Выдать задние группе</button></div>
+      <div class = "form" *ngIf="emit">
+      <mat-form-field class="form-fild" appearance="fill">
+        <mat-label>Номер задания</mat-label>
+        <input required matInput name="number" id="number" [(ngModel)]="newCurrentTask.taskId.id">
+      </mat-form-field>
+      <mat-form-field class="form-fild" appearance="fill">
+        <mat-label>Дата окончания</mat-label>
+        <input required matInput name="text" id="text1" type="datetime-local" [(ngModel)]="newCurrentTask.limitDate">
+      </mat-form-field>
+      <div><button class="form-fild" [disabled] = "(newCurrentTask.taskId.id === undefined)||(newCurrentTask.limitDate === undefined)" (click)="emitTask(group)" mat-stroked-button>Выдать</button></div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

@@ -1,0 +1,12 @@
+<form class="form" [formGroup]="loginForm">
+  <p class="mat-card-title">Вход:</p>
+  <mat-form-field appearance="fill">
+    <mat-label>Логин</mat-label>
+    <input matInput name="login" id="login" [(ngModel)]="login" formControlName="login" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Пароль</mat-label>
+    <input matInput type="password" name="password" id="password" [(ngModel)]="password" formControlName="password" required>
+  </mat-form-field>
+  <button (click)="submit()" [disabled]="!loginForm.valid" mat-stroked-button>Войти</button>
+</form>

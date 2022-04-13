@@ -1,0 +1,21 @@
+<div class="text-center">
+  <input class="form-control" type="file"
+         (change)="onChange($event)">
+
+  <button (click)="onUpload()"
+          class="btn btn-success">
+    Загрузить!
+  </button>
+</div>
+
+<!--Flag variable is used here-->
+<div class="container" *ngIf="loading">
+  <h3>Loading ...</h3>
+</div>
+
+<div class="container" *ngFor="let file of files">
+  <h3>{{file.name}}</h3>
+</div>
+<div *ngIf="files.length !== 0">
+<p><button (click)="deleteFile()" mat-stroked-button color="warn">Удалить последний загруженный файл</button></p>
+</div>

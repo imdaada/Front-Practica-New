@@ -1,0 +1,38 @@
+<div class="rows">
+<div *ngIf="role === 'ROLE_TEACHER'">
+  <mat-form-field appearance="fill">
+    <mat-label>Логин ученика</mat-label>
+    <input autocomplete="off" matInput name="login" id="login1" [(ngModel)]="user.login" (keyup)="findLogin()">
+  </mat-form-field>
+  <div *ngFor="let user of users"><a (click)="insertLogin(user.login)" href="javascript:console.log(1)" >{{user.login + '(' + user.firstName + ' ' + user.surname + ')'}}</a></div>
+  <button (click)="reset()" mat-stroked-button>Сбросить</button>
+  <div class="stat-str">
+  <div>Колличество созданных заданий: {{getNumOfTask()}}</div>
+  <div>Колличество выданных заданий: {{getNumOfCurrentTask()}}</div>
+  <div class="graded">Процент выполненных заданий: {{getNumOfGradedTaskS()}}</div>
+  <div class="time-out">Процент просроченных заданий: {{getNumOfClosedTaskS()}}</div>
+  <div class="started">Процент заданий в процессе: {{getNumOfInProgressS()}}</div>
+  <div class="not-started">Процент не начатых заданий: {{getNumOfNotStartedS()}}</div>
+  </div>
+</div>
+<div class="stat-str" *ngIf="role === 'ROLE_STUDENT'">
+  <div> Колличество полученых заданий: {{getNumOfCurrentTask()}}</div>
+  <div class="graded">Процент выполненных заданий: {{getNumOfGradedTaskS()}}</div>
+  <div class="time-out">Процент просроченных заданий: {{getNumOfClosedTaskS()}}</div>
+  <div class="started">Процент заданий в процессе: {{getNumOfInProgressS()}}</div>
+  <div class="not-started">Процент не начатых заданий: {{getNumOfNotStartedS()}}</div>
+  <canvas id="canvas1"></canvas>
+</div>
+<div>
+<google-chart #chart
+              [title]="title"
+              [type]="type"
+              [data]="data"
+              [columns]="columnNames"
+              [options]="options"
+              [width]="width"
+              [height]="height">
+</google-chart>
+</div>
+</div>
+

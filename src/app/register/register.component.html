@@ -1,0 +1,38 @@
+
+<form class="form" [formGroup] = 'registerForm'>
+  <p class="mat-card-title">Регистрация:</p>
+  <mat-form-field appearance="fill">
+    <mat-label>Логин</mat-label>
+    <input matInput name="login" id="login" [(ngModel)]="registerRequest.login" formControlName="login" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Пароль</mat-label>
+    <input matInput type="password" name="password" id="password" [(ngModel)]="registerRequest.password" formControlName="password" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Повторите пароль</mat-label>
+    <input matInput type="password" name="password2" id="password2" [(ngModel)]="password" formControlName="password2" required>
+    <mat-hint style="color: red" *ngIf="this.password !== this.registerRequest.password">Пароли не совпадают</mat-hint>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Выберите роль</mat-label>
+    <mat-select name="role" [(ngModel)]="registerRequest.role" formControlName="role" required>
+      <mat-option value="ROLE_STUDENT">Ученик</mat-option>
+      <mat-option value="ROLE_TEACHER">Учитель</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Имя</mat-label>
+    <input matInput name="firstName" id="firstName" [(ngModel)]="registerRequest.firstName" formControlName="firstName" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Фамилия</mat-label>
+    <input matInput name="surname" id="surname" [(ngModel)]="registerRequest.surname" formControlName="surname" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Email</mat-label>
+    <input matInput type="email" name="email" id="email" [(ngModel)]="registerRequest.email" placeholder="pat@example.com" formControlName="email" required>
+    <mat-error *ngIf="registerForm.invalid">{{getErrorMessage()}}</mat-error>
+  </mat-form-field>
+  <button (click)="submit()" [disabled]="!registerForm.valid || (this.registerRequest.password !== this.password)" type="submit" mat-stroked-button>Зарегестрироваться</button>
+</form>

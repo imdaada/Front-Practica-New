@@ -1,0 +1,28 @@
+div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.started {
+  color: #ff9f00;
+}
+
+.not-started {
+  color: #77666b;
+}
+
+.graded {
+  color: #239d33;
+}
+
+.time-out {
+  color: #d90400;
+}
+
+.rows {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
